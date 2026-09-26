@@ -371,29 +371,6 @@
     color:var(--muted); padding:.45rem .9rem; border-radius:999px; cursor:pointer; }
   .modebar button.on{ background:var(--blue); color:#fff; }
 
-  .arm{ position:fixed; inset:0; z-index:30; display:none; place-items:center;
-    width:100%; height:100%; height:100dvh; overflow:auto; overscroll-behavior:contain;
-    background:rgba(255,255,255,.82);
-    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-    text-align:center;
-    padding:calc(1rem + env(safe-area-inset-top,0px)) 1rem calc(1rem + env(safe-area-inset-bottom,0px)); }
-  body.shared.stage-mode .arm.show{ display:grid; }
-  body:has(.arm.show){ overflow:hidden; }          /* no background scroll behind the popup */
-  .arm > div{
-    width:min(420px, 100%);
-    padding:clamp(1.6rem, 6vw, 2.6rem) clamp(1.2rem, 5vw, 2.4rem);
-    background:#fff; border:1px solid var(--line); border-radius:24px;
-    box-shadow:0 24px 60px rgba(18,38,63,.16);
-  }
-  .arm h3{ font-family:'Fraunces',serif; font-weight:560;
-    font-size:clamp(1.3rem, 5.2vw, 2rem); line-height:1.2;
-    color:var(--ink); margin-bottom:clamp(1.1rem, 4vw, 1.6rem); }
-  .arm button{ border:none; background:var(--blue); color:#fff;
-    font:600 clamp(.92rem, 3.8vw, 1rem) 'Outfit',sans-serif; letter-spacing:.05em;
-    padding:1rem clamp(1.2rem, 6vw, 2.2rem); min-height:52px;
-    width:100%; white-space:nowrap;
-    border-radius:999px; cursor:pointer; box-shadow:0 10px 26px rgba(47,109,181,.3); }
-  .arm button:focus-visible{ outline:3px solid var(--sky); outline-offset:3px; }
 
   /* controller (phone) view */
   .ctrl{ display:none; min-height:100vh; min-height:100svh; padding:4.5rem 1.25rem 2.5rem;
@@ -607,12 +584,6 @@
 <div class="modebar" role="tablist" aria-label="View">
   <button id="mStage" class="on">Main screen</button>
   <button id="mCtrl">Light a lamp</button>
-</div>
-<div class="arm" id="arm">
-  <div>
-    <h3>Ceremony screen ready</h3>
-    <button id="armBtn">Start ceremony screen</button>
-  </div>
 </div>
 
 <section class="ctrl" id="ctrl">
@@ -1087,7 +1058,6 @@
   });
 
   /* ---------- modes ---------- */
-  var arm = document.getElementById('arm');
   var mStage = document.getElementById('mStage'), mCtrl = document.getElementById('mCtrl');
 
   function setMode(m, persist){
@@ -1099,20 +1069,18 @@
     if(m !== 'ctrl') alignRibbon();
   }
 
-  document.getElementById('armBtn').addEventListener('click', function(){
-    unlockAudio(); chime(0);
-    body.classList.add('no-transition');
-    arm.classList.remove('show');
-    window.scrollTo({ top:0, left:0, behavior:'instant' });
-    alignRibbon();
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        body.classList.remove('no-transition');
-      });
+  /* Browsers only allow sound after a user gesture: unlock on the first tap/click/key anywhere. */
+  function firstGesture(){
+    unlockAudio();
+    ['pointerdown','keydown','touchstart'].forEach(function(ev){
+      window.removeEventListener(ev, firstGesture, true);
     });
+  }
+  ['pointerdown','keydown','touchstart'].forEach(function(ev){
+    window.addEventListener(ev, firstGesture, true);
   });
 
-  mStage.addEventListener('click', function(){ setMode('stage'); arm.classList.add('show'); });
+  mStage.addEventListener('click', function(){ setMode('stage'); });
   mCtrl.addEventListener('click', function(){ setMode('ctrl'); });
   body.classList.add('stage-mode');
   body.classList.add('shared');
@@ -1170,7 +1138,6 @@
     if(!body.classList.contains('ctrl-mode')) return;
     body.classList.add('no-transition');
     setMode('stage', false);
-    arm.classList.remove('show');
     window.scrollTo({ top:0, left:0, behavior:'instant' });
     requestAnimationFrame(function(){
       alignRibbon();
@@ -1215,7 +1182,6 @@
     if(launched) return;
     launched = true;
     count.innerHTML = '';
-    arm.classList.remove('show');
     if(body.classList.contains('ctrl-mode')) setMode('stage', false);
     window.scrollTo({ top:0, left:0, behavior:'instant' });
     if(celebrate){
@@ -1315,7 +1281,6 @@
 
     if(mode === 'stage'){
       setMode('stage');
-      arm.classList.add('show');
     } else if(mode === 'ctrl' || (lampParam >= 1 && lampParam <= N)){
       setMode('ctrl');
       if(lampParam >= 1 && lampParam <= N) choose(lampParam - 1);
@@ -1324,7 +1289,6 @@
       try{ saved = localStorage.getItem('whd-mode'); }catch(e){}
       var m = saved || (window.innerWidth < 700 ? 'ctrl' : 'stage');
       setMode(m);
-      if(m === 'stage') arm.classList.add('show');
       if(m === 'ctrl'){
         var l = null;
         try{ l = localStorage.getItem('whd-lamp'); }catch(e){}
