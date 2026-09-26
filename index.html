@@ -508,7 +508,7 @@
   }
 </style>
 </head>
-<body>
+<body class="no-transition">
 
 <!-- Shared gradients for every lamp (kept outside .stage so ctrl view can render them) -->
 <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
@@ -1057,10 +1057,31 @@
     lamp.setAttribute('aria-disabled', 'true');
   });
 
+  /* ---------- no entry animation ----------
+     The page stays "frozen" (no transitions) until fonts + the first Firebase
+     snapshot are in, so lamps already lit / ribbon position just appear.   */
+  var entryDone = false;
+  function releaseMotion(){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        if(entryDone) body.classList.remove('no-transition');
+      });
+    });
+  }
+  function freezeMotion(){ body.classList.add('no-transition'); releaseMotion(); }
+  function finishEntry(){
+    if(entryDone) return;
+    entryDone = true;
+    alignRibbon();
+    releaseMotion();
+  }
+  setTimeout(finishEntry, 5000); /* safety net if Firebase is slow/offline */
+
   /* ---------- modes ---------- */
   var mStage = document.getElementById('mStage'), mCtrl = document.getElementById('mCtrl');
 
   function setMode(m, persist){
+    freezeMotion();
     body.classList.toggle('ctrl-mode', m === 'ctrl');
     body.classList.toggle('stage-mode', m !== 'ctrl');
     mStage.classList.toggle('on', m !== 'ctrl');
@@ -1139,10 +1160,8 @@
     body.classList.add('no-transition');
     setMode('stage', false);
     window.scrollTo({ top:0, left:0, behavior:'instant' });
-    requestAnimationFrame(function(){
-      alignRibbon();
-      requestAnimationFrame(function(){ body.classList.remove('no-transition'); });
-    });
+    requestAnimationFrame(alignRibbon);
+    releaseMotion();
   }
 
   document.getElementById('soloBack').addEventListener('click', function(){
@@ -1190,9 +1209,7 @@
       body.classList.add('instant-launch', 'no-transition');
       stage.classList.add('launched');
       body.classList.add('launched-body');
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){ body.classList.remove('no-transition'); });
-      });
+      releaseMotion();
     }
   }
 
@@ -1243,6 +1260,10 @@
 
       api.onValue(api.ref(api.db, 'event/lamps'), function(snap){
         applyRemote(toArray(snap.val()), !firstSnapshot);
+        if(!firstSnapshot){
+          (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
+            .then(finishEntry, finishEntry);
+        }
         firstSnapshot = true;
       }, function(err){
         console.error('Realtime Database listener failed:', err);
