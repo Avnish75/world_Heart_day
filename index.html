@@ -55,7 +55,7 @@
   }
 
   /* Logos: keep aspect ratio (width/height attrs are only for layout reservation) */
-  .brand img, .brand-sm img, .ctrl img.logo, footer img{ width:auto; }
+  .brand img, .brand-sm img, footer img{ width:auto; }
 
   /* All lamps already lit on arrival: show the launch screen directly */
   body.instant-launch .bow{ display:none; }
@@ -64,8 +64,11 @@
     animation-delay:0s, 1s !important;
   }
 
-  /* Main screen lamps: display only */
-  #lamps .lamp{ pointer-events:none; cursor:default; }
+  /* small status message (connection problems) */
+  .toast{ position:fixed; left:50%; bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));
+    transform:translateX(-50%); z-index:40; max-width:calc(100% - 2rem);
+    background:var(--ink); color:#fff; padding:.75rem 1.1rem; border-radius:12px;
+    font-size:.9rem; text-align:center; box-shadow:0 12px 30px rgba(18,38,63,.3); }
 
   /* Gradient defs holder — must never be inside a display:none subtree */
   .svg-defs{ position:absolute; width:0; height:0; overflow:hidden; }
@@ -375,47 +378,6 @@
   footer img{ height:52px; display:block; margin:0 auto 1rem; }
   footer b{ color:var(--ink); font-weight:500; }
 
-  /* ---------- MULTI-DEVICE ---------- */
-  .modebar{ position:fixed; top:calc(env(safe-area-inset-top,0px) + 12px);
-    left:calc(env(safe-area-inset-left,0px) + 12px); right:auto;
-    z-index:20; display:none; gap:4px; padding:4px; border-radius:999px;
-    background:rgba(255,255,255,.85); backdrop-filter:blur(8px);
-    box-shadow:0 4px 16px rgba(18,38,63,.12); border:1px solid var(--line); }
-  body.shared .modebar{ display:flex; }
-  body.launched-body .modebar{ display:none; }
-  .modebar button{ border:none; background:none; font:500 .8rem 'Outfit',sans-serif;
-    color:var(--muted); padding:.45rem .9rem; border-radius:999px; cursor:pointer; }
-  .modebar button.on{ background:var(--blue); color:#fff; }
-
-
-  /* controller (phone) view */
-  .ctrl{ display:none; min-height:100vh; min-height:100svh; padding:4.5rem 1.25rem 2.5rem;
-    text-align:center; flex-direction:column; align-items:center;
-    background:radial-gradient(ellipse 100% 60% at 50% 40%, var(--bg-soft), var(--bg) 75%); }
-  body.ctrl-mode .ctrl{ display:flex; }
-  body.ctrl-mode .stage, body.ctrl-mode .products, body.ctrl-mode footer{ display:none !important; }
-  .ctrl img.logo{ height:64px; margin-bottom:1.2rem; }
-  .ctrl h2{ font-family:'Fraunces',serif; font-weight:560; font-size:1.7rem; color:var(--ink);
-    margin-bottom:.4rem; }
-  .ctrl .hint{ color:var(--muted); font-weight:300; margin-bottom:1.8rem; }
-  .pick{ display:grid; grid-template-columns:repeat(3, 1fr); gap:.8rem; width:min(340px,100%); }
-  .pick button{ aspect-ratio:1; border-radius:18px; border:1px solid var(--line);
-    background:#fff; font:600 1.6rem 'Fraunces',serif; color:var(--blue); cursor:pointer;
-    box-shadow:0 6px 16px rgba(18,38,63,.08); }
-  .pick button.taken{ background:#FFF6E4; color:#A9741F; border-color:rgba(201,146,56,.4); }
-  .pick button.taken::after{ content:" \1FA94"; font-size:.9rem; }
-  .solo{ display:none; flex-direction:column; align-items:center; }
-  .ctrl.chosen .pick{ display:none; }
-  .ctrl.chosen .solo{ display:flex; }
-  .solo .lamp{ width:min(42vw, 180px); outline:none !important; transform:none !important; }
-  .solo .lamp:focus, .solo .lamp:focus-visible{ outline:none !important; box-shadow:none !important; }
-  .solo .lamp svg{ width:100%; height:auto; }
-  .solo .status{ margin-top:1.6rem; color:var(--muted); font-weight:300; min-height:1.5em; }
-  .solo .status b{ color:var(--ink); font-weight:500; }
-  .solo .back{ margin-top:1.4rem; background:none; border:none; color:var(--blue);
-    font:500 .9rem 'Outfit',sans-serif; cursor:pointer; text-decoration:underline; }
-  .ctrl .err{ color:#B3261E; font-size:.9rem; margin-top:1rem; max-width:34ch; }
-
   /* ================= RESPONSIVE ================= */
 
   /* touch polish */
@@ -428,8 +390,6 @@
   /* safe areas (notch / home bar) */
   .stage{ padding-top:calc(2rem + env(safe-area-inset-top,0px));
     padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px)); }
-  .ctrl{ padding-top:calc(4.5rem + env(safe-area-inset-top,0px));
-    padding-bottom:calc(2.5rem + env(safe-area-inset-bottom,0px)); }
 
   /* ---------- tablets / small laptops ---------- */
   @media (max-width:900px){
@@ -440,7 +400,7 @@
   /* ---------- phones (portrait): lamps in a 3 x 2 grid, ribbon + bow in the gap ---------- */
   @media (max-width:560px){
     .stage{ padding-left:1rem; padding-right:1rem;
-      padding-top:calc(4rem + env(safe-area-inset-top,0px)); }   /* clear the mode toggle */
+      padding-top:calc(2rem + env(safe-area-inset-top,0px)); }
     .brand img{ height:104px; }
     .kicker{ font-size:.78rem; letter-spacing:.12em; margin-bottom:.6rem; }
     .stage h1{ font-size:clamp(1.45rem, 6.6vw, 1.9rem); margin-bottom:1.8rem; max-width:18ch; }
@@ -477,13 +437,7 @@
     footer{ padding:2rem 1.1rem calc(2.5rem + env(safe-area-inset-bottom,0px)); }
     footer img{ height:44px; }
 
-    .modebar{ left:calc(env(safe-area-inset-left,0px) + 8px); top:calc(env(safe-area-inset-top,0px) + 8px); }
-    .modebar button{ padding:.4rem .7rem; font-size:.74rem; }
 
-    .ctrl img.logo{ height:88px; margin-bottom:.6rem; }
-    .ctrl h2{ font-size:1.5rem; }
-    .pick{ gap:.6rem; }
-    .solo .lamp{ width:min(52vw, 200px); }
   }
   @keyframes bowFallM{
     to{ transform:translate(-50%,-50%) translateY(360px) rotate(42deg); opacity:0; }
@@ -493,22 +447,17 @@
   @media (max-width:360px){
     .lamp{ width:26vw; }
     .lamps{ row-gap:56px; }
-    .pick button{ font-size:1.35rem; }
   }
 
   /* ---------- phones in landscape / short screens: keep one row, compress vertically ---------- */
   @media (max-height:520px) and (orientation:landscape){
-    .stage{ padding-top:calc(3rem + env(safe-area-inset-top,0px)); padding-bottom:1.2rem; }
+    .stage{ padding-top:calc(1.2rem + env(safe-area-inset-top,0px)); padding-bottom:1.2rem; }
     .brand img{ height:76px; }
     .kicker{ margin-bottom:.35rem; font-size:.78rem; }
     .stage h1{ font-size:clamp(1.2rem, 3.6vw, 1.7rem); margin-bottom:1rem; max-width:none; }
     .lamp{ width:clamp(60px, 11vw, 100px); }
     .bow{ width:80px; bottom:-34px; }
     .date-line{ margin-top:3.2rem; }
-    .ctrl{ padding-top:calc(3rem + env(safe-area-inset-top,0px)); }
-    .ctrl .hint{ margin-bottom:1rem; }
-    .pick{ grid-template-columns:repeat(6, 1fr); width:min(560px,100%); }
-    .solo .lamp{ width:min(26vh, 140px); }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -526,7 +475,7 @@
 </head>
 <body class="no-transition">
 
-<!-- Shared gradients for every lamp (kept outside .stage so ctrl view can render them) -->
+<!-- Shared gradients for every lamp (kept outside .stage) -->
 <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
   <defs>
     <linearGradient id="flameOuter" x1="0" y1="0" x2="0" y2="1">
@@ -597,27 +546,10 @@
 </template>
 
 <canvas id="confetti"></canvas>
-<div class="modebar" role="tablist" aria-label="View">
-  <button id="mStage" class="on">Main screen</button>
-  <button id="mCtrl">Light a lamp</button>
-</div>
 
-<section class="ctrl" id="ctrl">
-  <img class="logo" src="assets/ayusynk-logo.png" width="200" height="200" decoding="async" alt="AyuSynk">
-  <div class="pickwrap">
-    <h2>Light your lamp</h2>
-    <p class="hint">Choose the lamp number you've been given.</p>
-  </div>
-  <div class="pick" id="pick"></div>
-  <div class="solo" id="solo">
-    <div id="soloLamp"></div>
-    <p class="status" id="soloStatus"></p>
-    <button class="back" id="soloBack">Choose a different lamp</button>
-  </div>
-  <p class="err" id="ctrlErr" hidden></p>
-</section>
 
 <div id="flash"></div>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <section class="stage" id="stage">
 
@@ -794,7 +726,7 @@
   function alignRibbon(){
     if(launched || !ribbon) return;
     var hb = lampsRow.getBoundingClientRect(), st = stage.getBoundingClientRect();
-    if(!hb.height) return; /* stage hidden (ctrl mode) */
+    if(!hb.height) return;
     var first = lamps[0].getBoundingClientRect();
     var second = lamps[3] ? lamps[3].getBoundingClientRect() : first;
     var y;
@@ -1047,8 +979,7 @@
     lamps[i].classList.add('lit');
     recount();
     if(withSound) chime(lit);
-    renderCtrl();
-    if(lit === N && !launched && !body.classList.contains('ctrl-mode')){
+    if(lit === N && !launched){
       setTimeout(function(){ if(lit === N) launch(); }, 750);
     }
   }
@@ -1058,7 +989,6 @@
     state[i] = false;
     lamps[i].classList.remove('lit');
     recount();
-    renderCtrl();
   }
 
   function writeLamp(i){
@@ -1067,10 +997,34 @@
     });
   }
 
-  /* Main screen lamps are display-only: they can only be lit from a guest phone. */
-  lamps.forEach(function(lamp){
-    lamp.tabIndex = -1;
-    lamp.setAttribute('aria-disabled', 'true');
+  /* ---------- status message ---------- */
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  function showErr(msg, kind, sticky){
+    toastEl.textContent = msg;
+    toastEl.dataset.kind = kind || '';
+    toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    if(!sticky) toastTimer = setTimeout(function(){ toastEl.hidden = true; }, 4000);
+  }
+  function hideErr(kind){
+    if(!kind || toastEl.dataset.kind === kind) toastEl.hidden = true;
+  }
+
+  /* ---------- everyone lights lamps from this page ---------- */
+  lamps.forEach(function(lamp, i){
+    lamp.addEventListener('click', function(){
+      if(launched || state[i]) return;
+      unlockAudio();
+      lightLocal(i, true);
+      writeLamp(i).catch(function(err){
+        console.error(err);
+        unlightLocal(i);
+        refreshFromServer().then(function(){
+          if(!state[i]) showErr('Could not reach the ceremony database. Check your internet and try again.');
+        });
+      });
+    });
   });
 
   /* ---------- no entry animation ----------
@@ -1084,7 +1038,6 @@
       });
     });
   }
-  function freezeMotion(){ body.classList.add('no-transition'); releaseMotion(); }
   function finishEntry(){
     if(entryDone) return;
     entryDone = true;
@@ -1092,19 +1045,6 @@
     releaseMotion();
   }
   setTimeout(finishEntry, 5000); /* safety net if Firebase is slow/offline */
-
-  /* ---------- modes ---------- */
-  var mStage = document.getElementById('mStage'), mCtrl = document.getElementById('mCtrl');
-
-  function setMode(m, persist){
-    freezeMotion();
-    body.classList.toggle('ctrl-mode', m === 'ctrl');
-    body.classList.toggle('stage-mode', m !== 'ctrl');
-    mStage.classList.toggle('on', m !== 'ctrl');
-    mCtrl.classList.toggle('on', m === 'ctrl');
-    if(persist !== false){ try{ localStorage.setItem('whd-mode', m); }catch(e){} }
-    if(m !== 'ctrl') alignRibbon();
-  }
 
   /* Browsers only allow sound after a user gesture: unlock on the first tap/click/key anywhere. */
   function firstGesture(){
@@ -1117,113 +1057,13 @@
     window.addEventListener(ev, firstGesture, true);
   });
 
-  mStage.addEventListener('click', function(){ setMode('stage'); });
-  mCtrl.addEventListener('click', function(){ setMode('ctrl'); });
-  body.classList.add('stage-mode');
-  body.classList.add('shared');
-
-  /* ---------- phone controller ---------- */
-  var ctrl = document.getElementById('ctrl');
-  var pick = document.getElementById('pick');
-  var soloLamp = document.getElementById('soloLamp');
-  var soloStatus = document.getElementById('soloStatus');
-  var ctrlErr = document.getElementById('ctrlErr');
-  var mine = -1;
-  var pickBtns = [];
-
-  function showErr(msg, kind){
-    ctrlErr.textContent = msg;
-    ctrlErr.dataset.kind = kind || '';
-    ctrlErr.hidden = false;
-  }
-
-  for(var p=0;p<N;p++){
-    (function(i){
-      var b = document.createElement('button');
-      b.textContent = i+1;
-      b.setAttribute('aria-label', 'Lamp ' + (i+1));
-      b.addEventListener('click', function(){ choose(i); });
-      pick.appendChild(b); pickBtns.push(b);
-    })(p);
-  }
-
-  var solo = lamps[0].cloneNode(true);
-  solo.classList.remove('lit');
-  solo.removeAttribute('style');
-  solo.removeAttribute('aria-disabled');
-  solo.tabIndex = 0;
-  soloLamp.appendChild(solo);
-
-  solo.addEventListener('click', function(){
-    if(mine < 0 || state[mine]) return;
-    var i = mine;
-    unlockAudio();
-    ctrlErr.hidden = true;
-    lightLocal(i, true);
-    writeLamp(i).then(function(){
-      /* let the guest see their own flame, then show all six lamps */
-      setTimeout(goToStage, 1400);
-    }).catch(function(err){
-      console.error(err);
-      unlightLocal(i);
-      refreshFromServer().then(function(){
-        if(state[i]){
-          setTimeout(goToStage, 1400);   /* it was already lit by someone else */
-        } else {
-          showErr('Could not reach the ceremony database. Check your internet connection and try again.');
-        }
-      });
-    });
-  });
-
-  /* Guest -> main stage view (no "Start ceremony" overlay, not saved as this device's mode) */
-  function goToStage(){
-    if(!body.classList.contains('ctrl-mode')) return;
-    body.classList.add('no-transition');
-    setMode('stage', false);
-    window.scrollTo({ top:0, left:0, behavior:'instant' });
-    requestAnimationFrame(alignRibbon);
-    releaseMotion();
-  }
-
-  document.getElementById('soloBack').addEventListener('click', function(){
-    mine = -1;
-    ctrl.classList.remove('chosen');
-    renderCtrl();
-  });
-
-  function choose(i){
-    mine = i;
-    ctrl.classList.add('chosen');
-    try{ localStorage.setItem('whd-lamp', String(i)); }catch(e){}
-    renderCtrl();
-  }
-
-  function renderCtrl(){
-    pickBtns.forEach(function(b, i){
-      b.classList.toggle('taken', state[i]);
-      b.disabled = state[i];
-    });
-    if(mine < 0) return;
-    solo.classList.toggle('lit', state[mine]);
-    solo.setAttribute('aria-label', 'Light lamp ' + (mine+1));
-    if(lit === N){
-      soloStatus.innerHTML = '<b>All six lamps are lit.</b> Watch the big screen!';
-    } else if(state[mine]){
-      soloStatus.innerHTML = '<b>Lamp ' + (mine+1) + ' is lit.</b> ' + lit + ' of ' + N + ' flames are burning.';
-    } else {
-      soloStatus.innerHTML = 'Tap lamp <b>' + (mine+1) + '</b> to light its flame.';
-    }
-  }
-
   /* ---------- all lamps lit -> launch screen ---------- */
-  /* celebrate = true  : it just happened (confetti + sound, reveal animates in)
-     celebrate = false : page opened after the fact (reveal shown instantly)   */
+  /* celebrate = true  : it just happened (confetti + sound)
+     celebrate = false : page opened after the fact (reveal shown instantly) */
   function showLaunchedNow(celebrate){
     if(launched) return;
     launched = true;
     count.innerHTML = '';
-    if(body.classList.contains('ctrl-mode')) setMode('stage', false);
     window.scrollTo({ top:0, left:0, behavior:'instant' });
     if(celebrate){
       finale();
@@ -1246,7 +1086,7 @@
   function applyRemote(remote, initial){
     var anyRemote = remote.some(Boolean);
 
-    /* Full reset in Firebase */
+    /* Full reset in Firebase (admin page) */
     if(!anyRemote && state.some(Boolean)){
       if(launched){ location.reload(); return; }
       for(var r=0;r<N;r++) unlightLocal(r);
@@ -1257,16 +1097,10 @@
       if(remote[i] && !state[i]) lightLocal(i, !initial);
       else if(!remote[i] && state[i] && !launched) unlightLocal(i);
     }
-    renderCtrl();
 
-    /* All six lit: skip the lamp screen.
-       - opened/refreshed after the launch -> launch screen instantly
-       - on a guest phone -> jump to the launch screen with the celebration
-       (a main screen watching live keeps its 3-2-1 countdown via lightLocal) */
-    if(lit === N && !launched){
-      if(initial) showLaunchedNow(false);
-      else if(body.classList.contains('ctrl-mode')) showLaunchedNow(true);
-    }
+    /* Opened/refreshed after all six were lit: go straight to the launch screen.
+       (Watching live, the 3-2-1 countdown runs via lightLocal.) */
+    if(initial && lit === N && !launched) showLaunchedNow(false);
   }
 
   function refreshFromServer(){
@@ -1289,21 +1123,21 @@
         firstSnapshot = true;
       }, function(err){
         console.error('Realtime Database listener failed:', err);
-        showErr('Realtime connection failed. Please refresh this page.');
+        showErr('Realtime connection failed. Please refresh this page.', 'conn', true);
       });
 
       api.onValue(api.ref(api.db, '.info/connected'), function(snap){
         if(snap.val() === true){
           if(everConnected) refreshFromServer();
           everConnected = true;
-          if(ctrlErr.dataset.kind === 'conn') ctrlErr.hidden = true;
+          hideErr('conn');
         } else if(everConnected){
-          showErr('Connection lost — reconnecting…', 'conn');
+          showErr('Connection lost — reconnecting…', 'conn', true);
         }
       });
     }).catch(function(err){
       console.error('Firebase initialization failed:', err);
-      showErr('Firebase could not be initialized. Check that anonymous sign-in is enabled and this domain is authorised.');
+      showErr('Could not connect to the ceremony database. Please refresh.', 'conn', true);
     });
   }
 
@@ -1315,23 +1149,6 @@
   window.addEventListener('online', refreshFromServer);
   /* Restored from back/forward cache = stale JS state; reload fresh. */
   window.addEventListener('pageshow', function(e){ if(e.persisted) location.reload(); });
-
-  /* ---------- URL / device mode ---------- */
-  (function initViewFromUrl(){
-    var params = new URLSearchParams(location.search);
-    var mode = params.get('mode');
-    var lampParam = parseInt(params.get('lamp'), 10);
-
-    if(mode === 'stage'){
-      setMode('stage');
-    } else if(mode === 'ctrl' || (lampParam >= 1 && lampParam <= N)){
-      setMode('ctrl');
-      if(lampParam >= 1 && lampParam <= N) choose(lampParam - 1);
-    } else {
-      /* plain visit to the website: always the main screen */
-      setMode('stage', false);
-    }
-  })();
 
   startFirebase();
 
