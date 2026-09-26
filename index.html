@@ -70,6 +70,9 @@
     background:var(--ink); color:#fff; padding:.75rem 1.1rem; border-radius:12px;
     font-size:.9rem; text-align:center; box-shadow:0 12px 30px rgba(18,38,63,.3); }
 
+  /* low-power devices (set by JS): drop the remaining glow filter */
+  html.lite .ecg-live{ filter:none; }
+
   /* Gradient defs holder — must never be inside a display:none subtree */
   .svg-defs{ position:absolute; width:0; height:0; overflow:hidden; }
 
@@ -103,6 +106,7 @@
     pointer-events:none; overflow:hidden;
   }
   .ecg-band svg{ width:200%; height:100%; display:block;
+    will-change:transform; transform:translateZ(0);
     animation:ecg-scroll 6s linear infinite; }
   @keyframes ecg-scroll{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
   .ecg-flat{ stroke:rgba(47,109,181,.22); }
@@ -131,26 +135,32 @@
   .lamp{ background:none; border:none; padding:0; cursor:pointer;
     width:clamp(78px, 14.5vw, 150px); position:relative; z-index:6;
     transition:transform .5s cubic-bezier(.2,.8,.3,1.2), opacity .6s ease; }
-  .lamp svg{ width:100%; height:auto; display:block;
-    transition:filter .7s ease; }
+  .lamp svg{ width:100%; height:auto; display:block; position:relative; z-index:1; }
 
-  /* UNLIT: natural brass, normal shadow */
+  /* Performance: SVG drop-shadow filters were re-rendered every frame while the
+     flame flickers. Shadow + halo are now cheap gradient layers (GPU opacity only). */
+
+  /* soft body shadow (static) */
+  .lamp::before{
+    content:""; position:absolute; left:50%; top:0; width:150%; height:78%;
+    transform:translateX(-50%); pointer-events:none; z-index:0; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(255,186,80,.55), rgba(255,186,80,.22) 45%, rgba(255,186,80,0) 100%);
+    opacity:0; transition:opacity .6s ease;
+  }
+
+  /* UNLIT: natural brass with soft shadow (static, so the filter is painted once) */
   .lamp:not(.lit) svg{ filter:drop-shadow(0 12px 22px rgba(18,38,63,.24)); }
 
-  /* LIT: full warm brass, lifted, golden halo — clearly "burning" */
+  /* LIT: lifted + golden halo behind the lamp */
   .lamp.lit{ opacity:1; transform:translateY(-6px) scale(1.04); }
-  .lamp.lit svg{
-    filter:drop-shadow(0 18px 26px rgba(18,38,63,.26))
-           drop-shadow(0 0 22px rgba(255,176,60,.55))
-           drop-shadow(0 0 48px rgba(255,190,90,.35))
-           saturate(1.12) brightness(1.05);
-  }
+  .lamp.lit::before{ opacity:1; animation:haloP 1.7s ease-in-out infinite; }
+  @keyframes haloP{ 0%,100%{ opacity:.8; } 50%{ opacity:1; } }
   /* warm floor glow under a lit lamp */
   .lamp::after{
     content:""; position:absolute; left:10%; right:10%; bottom:-4%;
     height:14%; border-radius:50%; pointer-events:none;
     background:radial-gradient(ellipse at center, rgba(255,184,77,.55), rgba(255,184,77,0) 70%);
-    opacity:0; transition:opacity .8s ease;
+    opacity:0; transition:opacity .8s ease; z-index:0;
   }
   .lamp.lit::after{ opacity:1; }
 
@@ -162,7 +172,7 @@
   .lamp.lit{ cursor:default; }
   .lamp.lit .flame{ opacity:1; transform-origin:70px 66px;
     animation:flick .95s ease-in-out infinite; }
-  .lamp.lit .glow{ opacity:1; animation:glowP 1.7s ease-in-out infinite; }
+  .lamp.lit .glow{ opacity:1; }
   @keyframes flick{
     0%,100%{ transform:scale(1) rotate(0deg); }
     30%{ transform:scale(1.07,1.14) rotate(-2.5deg); }
@@ -250,6 +260,7 @@
     box-shadow:0 18px 44px rgba(18,38,63,.28);
     opacity:0; transform:scale(.8) translateY(20px);
   }
+  .stage.launched .device-shot{ will-change:transform, opacity; }
   .stage.launched .device-shot{
     animation:devicePop .9s cubic-bezier(.2,.9,.3,1.2) 1.6s forwards,
       deviceFloat 4.5s ease-in-out 2.6s infinite;
@@ -262,10 +273,8 @@
     to{ opacity:1; transform:scale(1) translateY(0); }
   }
   @keyframes deviceFloat{
-    0%,100%{ transform:translateY(0);
-      box-shadow:0 18px 44px rgba(18,38,63,.28), 0 0 0 rgba(47,109,181,0); }
-    50%{ transform:translateY(-12px);
-      box-shadow:0 30px 56px rgba(18,38,63,.34), 0 0 34px rgba(47,109,181,.35); }
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-12px); }
   }
   .reveal .device-shot img{ width:100%; height:auto; display:block; }
   .reveal .device-cap{ color:var(--muted); font-size:.85rem; margin-top:.7rem;
@@ -299,7 +308,7 @@
     position:absolute; left:50%; top:40%; width:62px; height:62px;
     transform:translate(-50%,-50%);
     animation:beatAI 1.4s ease-in-out infinite;
-    filter:drop-shadow(0 0 14px rgba(229,52,75,.5));
+    will-change:transform;
   }
   @keyframes beatAI{
     0%,100%{ transform:translate(-50%,-50%) scale(1); }
@@ -312,6 +321,12 @@
     position:absolute; left:9%; right:9%; bottom:11%; height:52px;
     display:flex; align-items:flex-end; gap:4px;
   }
+  .ai-visual::before{
+    content:""; position:absolute; left:50%; top:40%; width:120px; height:120px;
+    transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+    background:radial-gradient(closest-side, rgba(229,52,75,.45), rgba(229,52,75,0));
+  }
+  .ai-rings i, .ai-bars b{ will-change:transform, opacity; }
   .ai-bars b{
     flex:1; height:100%; border-radius:3px;
     background:linear-gradient(180deg, #7FB2E5, #2F6DB5);
@@ -661,6 +676,11 @@
 <!-- Build static artwork (runs synchronously, before the main script) -->
 <script>
 (function(){
+  /* phones / low-power devices get lighter effects */
+  var cores = navigator.hardwareConcurrency || 8, mem = navigator.deviceMemory || 8;
+  if(cores <= 4 || mem <= 4 || Math.min(screen.width, screen.height) < 600){
+    document.documentElement.classList.add('lite');
+  }
 
   /* lamps */
   var lampTpl = document.getElementById('lampArt');
@@ -780,6 +800,25 @@
       o.start(); o.stop(actx.currentTime+0.65);
     }catch(e){}
   }
+  var noiseCache = {};
+  function noiseBuffer(dur, fade){
+    var key = dur + (fade ? 'f' : 'n');
+    if(noiseCache[key]) return noiseCache[key];
+    var b = actx.createBuffer(1, Math.floor(actx.sampleRate*dur), actx.sampleRate);
+    var d = b.getChannelData(0);
+    for(var i=0; i<d.length; i++){
+      d[i] = (Math.random()*2-1) * (fade ? Math.min(1, (d.length-i)/d.length) : 1);
+    }
+    noiseCache[key] = b;
+    return b;
+  }
+  /* build the launch-sound noise once audio is unlocked, so launch doesn't stutter */
+  function prewarmSound(){
+    try{
+      if(!actx) return;
+      noiseBuffer(3.2, true); noiseBuffer(2.4, false);
+    }catch(e){}
+  }
   function blastoff(){
     try{
       actx = actx || new (window.AudioContext||window.webkitAudioContext)();
@@ -787,14 +826,6 @@
       var master = actx.createGain();
       master.gain.value = 0.9;
       master.connect(actx.destination);
-      function noiseBuffer(dur, fade){
-        var b = actx.createBuffer(1, Math.floor(actx.sampleRate*dur), actx.sampleRate);
-        var d = b.getChannelData(0);
-        for(var i=0; i<d.length; i++){
-          d[i] = (Math.random()*2-1) * (fade ? Math.min(1, (d.length-i)/d.length) : 1);
-        }
-        return b;
-      }
       function rumble(start, dur){
         var lp = actx.createBiquadFilter(), g = actx.createGain();
         lp.type = 'lowpass'; lp.frequency.value = 180;
@@ -845,6 +876,9 @@
   /* ---------- confetti ---------- */
   var cv = document.getElementById('confetti'), ctx = cv.getContext('2d');
   var parts = [], raf = null;
+  var LITE = document.documentElement.classList.contains('lite');
+  var CONFETTI_SCALE = LITE ? 0.3 : 1;
+  var MAX_PARTS = LITE ? 380 : 1400;
   function sizeCanvas(){ cv.width = innerWidth; cv.height = innerHeight; }
   sizeCanvas(); addEventListener('resize', sizeCanvas);
   var colors = ['#2F6DB5','#7FB2E5','#1E4E87','#FFFFFF','#E5344B'];
@@ -860,6 +894,7 @@
     };
   }
   function burst(n, spreadY){
+    n = Math.min(Math.round(n * CONFETTI_SCALE), MAX_PARTS - parts.length);
     for(var i=0;i<n;i++){
       parts.push(makePart(
         cv.width/2 + (Math.random()-0.5)*cv.width*0.55,
@@ -871,6 +906,7 @@
     if(!raf) raf = requestAnimationFrame(step);
   }
   function cannon(side, n){
+    n = Math.min(Math.round(n * CONFETTI_SCALE), MAX_PARTS - parts.length);
     for(var i=0;i<n;i++){
       var fromLeft = side === 'l';
       parts.push(makePart(
@@ -892,14 +928,21 @@
   }
   function step(){
     ctx.clearRect(0,0,cv.width,cv.height);
-    parts = parts.filter(function(p){ return p.life>0 && p.y<cv.height+40; });
-    parts.forEach(function(p){
+    var alive = [];
+    for(var i=0;i<parts.length;i++){
+      var p = parts[i];
       p.vy += 0.22; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life -= 0.004;
-      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
-      ctx.globalAlpha = Math.max(p.life,0); ctx.fillStyle = p.c;
-      if(p.heart){ drawHeart(p); } else { ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); }
-      ctx.restore();
-    });
+      if(p.life <= 0 || p.y > cv.height + 40) continue;
+      alive.push(p);
+      var c = Math.cos(p.r), sn = Math.sin(p.r);
+      ctx.setTransform(c, sn, -sn, c, p.x, p.y);   /* translate+rotate in one call */
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.c;
+      if(p.heart && !LITE){ drawHeart(p); } else { ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); }
+    }
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.globalAlpha = 1;
+    parts = alive;
     raf = parts.length ? requestAnimationFrame(step) : null;
     if(!parts.length) ctx.clearRect(0,0,cv.width,cv.height);
   }
@@ -1049,6 +1092,7 @@
   /* Browsers only allow sound after a user gesture: unlock on the first tap/click/key anywhere. */
   function firstGesture(){
     unlockAudio();
+    setTimeout(prewarmSound, 300);
     ['pointerdown','keydown','touchstart'].forEach(function(ev){
       window.removeEventListener(ev, firstGesture, true);
     });
@@ -1137,7 +1181,15 @@
       });
     }).catch(function(err){
       console.error('Firebase initialization failed:', err);
-      showErr('Could not connect to the ceremony database. Please refresh.', 'conn', true);
+      var code = (err && (err.code || err.message)) || 'unknown';
+      var hint =
+        /admin-restricted-operation|operation-not-allowed/.test(code) ? 'Anonymous sign-in is OFF in Firebase Authentication.' :
+        /operation-not-supported-in-this-environment/.test(code)       ? 'Open the page over http(s) (Live Server / hosting), not as a file.' :
+        /unauthorized-domain/.test(code)                                ? 'Add this domain in Firebase Authentication \u2192 Settings \u2192 Authorized domains.' :
+        /api-key|referer|requests-from-referer/.test(code)             ? 'The API key restrictions block this website.' :
+        /network-request-failed|within 15s/.test(code)                  ? 'Network blocked or no internet.' :
+        'Please refresh.';
+      showErr('Could not connect to the ceremony database. ' + hint + ' [' + code + ']', 'conn', true);
     });
   }
 
