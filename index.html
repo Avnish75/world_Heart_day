@@ -29,7 +29,9 @@
   }
 
   *{ margin:0; padding:0; box-sizing:border-box; }
-  html{ scroll-behavior:smooth; }
+  html{ scroll-behavior:smooth; overflow-x:hidden; }
+  @supports (overflow:clip){ html, body{ overflow-x:clip; } }
+  .stage{ overflow-x:clip; }
   body{
     background:var(--bg);
     font-family:'Outfit',system-ui,-apple-system,sans-serif;
@@ -82,7 +84,7 @@
   .ecg-band{
     position:absolute; left:0; right:0; top:50%;
     height:220px; transform:translateY(-50%);
-    pointer-events:none;
+    pointer-events:none; overflow:hidden;
   }
   .ecg-band svg{ width:200%; height:100%; display:block;
     animation:ecg-scroll 6s linear infinite; }
@@ -361,7 +363,8 @@
   footer b{ color:var(--ink); font-weight:500; }
 
   /* ---------- MULTI-DEVICE ---------- */
-  .modebar{ position:fixed; top:calc(env(safe-area-inset-top,0px) + 12px); right:12px;
+  .modebar{ position:fixed; top:calc(env(safe-area-inset-top,0px) + 12px);
+    left:calc(env(safe-area-inset-left,0px) + 12px); right:auto;
     z-index:20; display:none; gap:4px; padding:4px; border-radius:999px;
     background:rgba(255,255,255,.85); backdrop-filter:blur(8px);
     box-shadow:0 4px 16px rgba(18,38,63,.12); border:1px solid var(--line); }
@@ -461,7 +464,7 @@
     footer{ padding:2rem 1.1rem calc(2.5rem + env(safe-area-inset-bottom,0px)); }
     footer img{ height:44px; }
 
-    .modebar{ right:8px; }
+    .modebar{ left:calc(env(safe-area-inset-left,0px) + 8px); top:calc(env(safe-area-inset-top,0px) + 8px); }
     .modebar button{ padding:.4rem .7rem; font-size:.74rem; }
 
     .ctrl img.logo{ height:88px; margin-bottom:.6rem; }
