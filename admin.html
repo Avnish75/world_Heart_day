@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Ceremony admin — World Heart Day</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪔</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,680&family=Outfit:wght@300;400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#FFFFFF; --bg-soft:#F2F7FC; --blue:#2F6DB5; --blue-deep:#1E4E87; --sky:#7FB2E5;
+    --ink:#12263F; --muted:#5B6E85; --red:#E5344B; --line:rgba(47,109,181,.18);
+    --gold:#DCA23E; --gold-soft:#FFF6E4;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html, body{ overflow-x:hidden; }
+  body{
+    font-family:'Outfit',system-ui,-apple-system,sans-serif; color:var(--ink);
+    min-height:100vh; min-height:100dvh; -webkit-font-smoothing:antialiased;
+    background:radial-gradient(ellipse 100% 60% at 50% 0%, var(--bg-soft), var(--bg) 70%);
+  }
+  button, input{ font:inherit; }
+  button{ -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+
+  .wrap{ width:min(560px, 100%); margin:0 auto;
+    padding:calc(1.5rem + env(safe-area-inset-top,0px)) 1rem calc(2rem + env(safe-area-inset-bottom,0px)); }
+
+  .top{ display:flex; align-items:center; gap:.9rem; margin-bottom:1.6rem; }
+  .top img{ height:84px; width:auto; margin:-10px -6px -10px -10px; }
+  .top h1{ font-family:'Fraunces',serif; font-weight:560; font-size:1.55rem; line-height:1.1; }
+  .top .sub{ color:var(--muted); font-size:.85rem; font-weight:300; margin-top:.2rem; }
+
+  .card{ background:#fff; border:1px solid var(--line); border-radius:20px;
+    padding:1.4rem 1.25rem; box-shadow:0 14px 36px rgba(18,38,63,.08); margin-bottom:1rem; }
+  .card h2{ font-family:'Fraunces',serif; font-weight:560; font-size:1.25rem; }
+  .muted{ color:var(--muted); font-weight:300; font-size:.92rem; line-height:1.5; }
+
+  .btn{ display:block; width:100%; min-height:50px; margin-top:1.2rem; border:none; border-radius:999px;
+    background:var(--blue); color:#fff; font-weight:600; letter-spacing:.04em; cursor:pointer;
+    box-shadow:0 10px 24px rgba(47,109,181,.25); }
+  .btn:disabled{ opacity:.6; cursor:progress; }
+  .btn:focus-visible{ outline:3px solid var(--sky); outline-offset:3px; }
+
+  /* status head */
+  .head{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+  .conn{ display:inline-flex; align-items:center; gap:.4rem; font-size:.78rem; color:var(--muted);
+    padding:.3rem .65rem; border-radius:999px; background:var(--bg-soft); white-space:nowrap; }
+  .conn::before{ content:""; width:8px; height:8px; border-radius:50%; background:#C9A227; }
+  .conn.on::before{ background:#2E9E5B; }
+  .conn.off::before{ background:var(--red); }
+
+  .count{ margin:.9rem 0 1rem; font-size:.95rem; color:var(--muted); }
+  .count b{ font-family:'Fraunces',serif; font-size:1.9rem; color:var(--ink); font-weight:680; margin-right:.2rem; }
+  .bar{ height:6px; border-radius:6px; background:var(--bg-soft); overflow:hidden; margin-bottom:1.1rem; }
+  .bar i{ display:block; height:100%; width:0; background:linear-gradient(90deg, var(--gold), #F2C56A);
+    transition:width .4s ease; }
+
+  /* lamp list */
+  .lamps{ list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+  .lamp{ display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+    padding:.75rem .8rem; border:1px solid var(--line); border-radius:14px; background:#fff;
+    transition:background .3s ease, border-color .3s ease; }
+  .lamp.lit{ background:var(--gold-soft); border-color:rgba(201,146,56,.45); }
+  .lamp .name{ display:flex; align-items:center; gap:.55rem; font-weight:500; }
+  .lamp .dot{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+    font-size:.8rem; font-weight:600; color:var(--blue); background:var(--bg-soft); }
+  .lamp.lit .dot{ background:#FFE3A6; color:#8F5F16; }
+  .lamp .state{ display:block; font-size:.74rem; color:var(--muted); font-weight:300; }
+
+  /* switch */
+  .switch{ position:relative; width:46px; height:28px; flex:none; }
+  .switch input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+  .switch span{ position:absolute; inset:0; border-radius:999px; background:#D5DEEA; transition:background .25s ease; pointer-events:none; }
+  .switch span::after{ content:""; position:absolute; top:3px; left:3px; width:22px; height:22px;
+    border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(18,38,63,.2); transition:transform .25s ease; }
+  .switch input:checked + span{ background:var(--gold); }
+  .switch input:checked + span::after{ transform:translateX(18px); }
+  .switch input:focus-visible + span{ outline:3px solid var(--sky); outline-offset:2px; }
+  .switch input:disabled{ cursor:progress; }
+
+  /* reset */
+  .danger h2{ color:var(--ink); }
+  .btn-danger{ background:var(--red); box-shadow:0 10px 24px rgba(229,52,75,.25); }
+  .btn-danger.armed{ background:#B3261E; animation:pulse 1s ease-in-out infinite; }
+  @keyframes pulse{ 50%{ box-shadow:0 0 0 8px rgba(229,52,75,.18); } }
+
+  .foot{ text-align:center; color:var(--muted); font-size:.85rem; margin-top:1.2rem; }
+  .link{ background:none; border:none; color:var(--blue); text-decoration:underline; cursor:pointer; padding:.2rem; }
+
+  .toast{ position:fixed; left:50%; bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));
+    transform:translateX(-50%); background:var(--ink); color:#fff; padding:.75rem 1.1rem;
+    border-radius:12px; font-size:.9rem; box-shadow:0 12px 30px rgba(18,38,63,.3);
+    max-width:calc(100% - 2rem); text-align:center; z-index:10; }
+
+  @media (max-width:380px){
+    .lamps{ grid-template-columns:1fr; }
+    .top img{ height:52px; }
+    .top h1{ font-size:1.35rem; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <img src="assets/ayusynk-logo.png" width="200" height="200" alt="AyuSynk">
+    <div>
+      <h1>Ceremony admin</h1>
+      <p class="sub">World Heart Day · 29 September 2026</p>
+    </div>
+  </header>
+
+
+
+
+  <!-- Admin controls -->
+  <section id="adminView">
+    <div class="card">
+      <div class="head">
+        <h2>Lamps</h2>
+        <span class="conn" id="conn">Connecting…</span>
+      </div>
+      <p class="count"><b id="litCount">0</b> of 6 lamps lit</p>
+      <div class="bar"><i id="litBar"></i></div>
+      <ul class="lamps" id="lampList"></ul>
+    </div>
+
+    <div class="card danger">
+      <h2>Reset lamps</h2>
+      <p class="muted" style="margin-top:.4rem">Turns all six lamps off. Every open screen returns to the lamp view, ready for the ceremony again.</p>
+      <button class="btn btn-danger" id="resetBtn" type="button">Reset all lamps</button>
+    </div>
+
+  </section>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDldIMAPxrbkCBTNWahQF7pqzlNyngcKkM",
+    authDomain: "world-heart-day-2026.firebaseapp.com",
+    databaseURL: "https://world-heart-day-2026-default-rtdb.firebaseio.com",
+    projectId: "world-heart-day-2026",
+    storageBucket: "world-heart-day-2026.firebasestorage.app",
+    messagingSenderId: "599947929815",
+    appId: "1:599947929815:web:3e6f8043f977d4babe2892"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  const N = 6;
+
+  const $ = (id) => document.getElementById(id);
+
+  let toastTimer = null;
+  function toast(msg){
+    const t = $('toast');
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 2800);
+  }
+
+  /* ---------- lamp list ---------- */
+  const rows = [];
+  for(let i = 0; i < N; i++){
+    const li = document.createElement('li');
+    li.className = 'lamp';
+    li.innerHTML = `
+      <div class="name"><span class="dot">${i+1}</span>
+        <div>Lamp ${i+1}<span class="state">Off</span></div></div>
+      <label class="switch"><input type="checkbox" role="switch" aria-label="Lamp ${i+1}"><span></span></label>`;
+    const input = li.querySelector('input');
+    input.addEventListener('change', async () => {
+      const on = input.checked;
+      input.disabled = true;
+      try{
+        await set(ref(db, `event/lamps/${i+1}`), on);
+      }catch(e){
+        console.error(e);
+        input.checked = !on;
+        toast(`Could not update lamp ${i+1}: ${e.code || e.message}`);
+      }finally{
+        input.disabled = false;
+      }
+    });
+    $('lampList').appendChild(li);
+    rows.push({ li, input, label: li.querySelector('.state') });
+  }
+
+  function render(data){
+    data = data || {};
+    let lit = 0;
+    rows.forEach((r, i) => {
+      const on = data[String(i+1)] === true;
+      if(on) lit++;
+      r.li.classList.toggle('lit', on);
+      r.label.textContent = on ? 'Lit' : 'Off';
+      if(!r.input.disabled) r.input.checked = on;
+    });
+    $('litCount').textContent = lit;
+    $('litBar').style.width = (lit / N * 100) + '%';
+  }
+
+  /* ---------- reset (tap twice to confirm) ---------- */
+  const resetBtn = $('resetBtn');
+  let armTimer = null;
+  function disarm(){
+    resetBtn.classList.remove('armed');
+    resetBtn.textContent = 'Reset all lamps';
+    clearTimeout(armTimer);
+  }
+  resetBtn.addEventListener('click', async () => {
+    if(!resetBtn.classList.contains('armed')){
+      resetBtn.classList.add('armed');
+      resetBtn.textContent = 'Tap again to reset';
+      armTimer = setTimeout(disarm, 4000);
+      return;
+    }
+    disarm();
+    resetBtn.disabled = true;
+    try{
+      await set(ref(db, 'event/lamps'), null);
+      toast('All lamps reset');
+    }catch(e){
+      console.error(e);
+      toast('Reset failed: ' + (e.code || e.message));
+    }finally{
+      resetBtn.disabled = false;
+    }
+  });
+
+  /* ---------- connect (no login: same anonymous access as the main page) ---------- */
+  const lockUI = (locked) => {
+    resetBtn.disabled = locked;
+    rows.forEach(r => r.input.disabled = locked);
+  };
+  lockUI(true);
+
+  signInAnonymously(auth).then(() => {
+    lockUI(false);
+    onValue(ref(db, 'event/lamps'), s => render(s.val()),
+      e => toast('Could not read lamps: ' + (e.code || e.message)));
+    onValue(ref(db, '.info/connected'), s => {
+      const c = $('conn'), on = s.val() === true;
+      c.classList.toggle('on', on); c.classList.toggle('off', !on);
+      c.textContent = on ? 'Live' : 'Reconnecting…';
+    });
+  }).catch(e => {
+    console.error(e);
+    const c = $('conn');
+    c.classList.add('off'); c.textContent = 'Offline';
+    toast('Could not connect to Firebase: ' + (e.code || e.message));
+  });
+</script>
+</body>
+</html>

@@ -2,6 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+  /* Any link containing /admin (or ?admin / #admin) goes to the admin page only. */
+  (function(){
+    var path = location.pathname;
+    var wantsAdmin = /\/admin\/?$/i.test(path) ||
+                     /(^|[?&])admin(=|&|$)/i.test(location.search.slice(1)) ||
+                     /^#\/?admin$/i.test(location.hash);
+    if(wantsAdmin){
+      var base = path.replace(/\/admin\/?$/i, '/').replace(/[^\/]*$/, '');
+      location.replace(base + 'admin.html');
+    }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1153,7 +1166,13 @@
     }).catch(function(err){
       console.error(err);
       unlightLocal(i);
-      showErr('Could not reach the ceremony database. Check your internet connection and try again.');
+      refreshFromServer().then(function(){
+        if(state[i]){
+          setTimeout(goToStage, 1400);   /* it was already lit by someone else */
+        } else {
+          showErr('Could not reach the ceremony database. Check your internet connection and try again.');
+        }
+      });
     });
   });
 
@@ -1251,8 +1270,8 @@
   }
 
   function refreshFromServer(){
-    if(!api) return;
-    api.get(api.ref(api.db, 'event/lamps')).then(function(snap){
+    if(!api) return Promise.resolve();
+    return api.get(api.ref(api.db, 'event/lamps')).then(function(snap){
       applyRemote(toArray(snap.val()), false);
     }).catch(function(e){ console.warn('Refresh failed:', e); });
   }
@@ -1309,15 +1328,8 @@
       setMode('ctrl');
       if(lampParam >= 1 && lampParam <= N) choose(lampParam - 1);
     } else {
-      var saved = null;
-      try{ saved = localStorage.getItem('whd-mode'); }catch(e){}
-      var m = saved || (window.innerWidth < 700 ? 'ctrl' : 'stage');
-      setMode(m);
-      if(m === 'ctrl'){
-        var l = null;
-        try{ l = localStorage.getItem('whd-lamp'); }catch(e){}
-        if(l !== null && +l >= 0 && +l < N) choose(+l);
-      }
+      /* plain visit to the website: always the main screen */
+      setMode('stage', false);
     }
   })();
 
