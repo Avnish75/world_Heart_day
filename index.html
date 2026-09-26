@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -357,12 +357,6 @@
   footer img{ height:52px; display:block; margin:0 auto 1rem; }
   footer b{ color:var(--ink); font-weight:500; }
 
-  @media (max-width:480px){
-    .lamps{ gap:.3rem; }
-    .lamp{ width:14.8vw; }
-    .bow{ width:96px; bottom:-40px; }
-  }
-
   /* ---------- MULTI-DEVICE ---------- */
   .modebar{ position:fixed; top:calc(env(safe-area-inset-top,0px) + 12px); right:12px;
     z-index:20; display:none; gap:4px; padding:4px; border-radius:999px;
@@ -411,6 +405,101 @@
   .solo .back{ margin-top:1.4rem; background:none; border:none; color:var(--blue);
     font:500 .9rem 'Outfit',sans-serif; cursor:pointer; text-decoration:underline; }
   .ctrl .err{ color:#B3261E; font-size:.9rem; margin-top:1rem; max-width:34ch; }
+
+  /* ================= RESPONSIVE ================= */
+
+  /* touch polish */
+  button{ -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+  /* hover lift only on real pointers (avoids "stuck" hover on phones) */
+  @media (hover:none){
+    .lamp:hover:not(.lit){ transform:none; }
+  }
+
+  /* safe areas (notch / home bar) */
+  .stage{ padding-top:calc(2rem + env(safe-area-inset-top,0px));
+    padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px)); }
+  .ctrl{ padding-top:calc(4.5rem + env(safe-area-inset-top,0px));
+    padding-bottom:calc(2.5rem + env(safe-area-inset-bottom,0px)); }
+
+  /* ---------- tablets / small laptops ---------- */
+  @media (max-width:900px){
+    .brand img{ height:110px; }
+    .stage h1{ margin-bottom:2.2rem; }
+  }
+
+  /* ---------- phones (portrait): lamps in a 3 x 2 grid, ribbon + bow in the gap ---------- */
+  @media (max-width:560px){
+    .stage{ padding-left:1rem; padding-right:1rem;
+      padding-top:calc(4rem + env(safe-area-inset-top,0px)); }   /* clear the mode toggle */
+    .brand img{ height:104px; }
+    .kicker{ font-size:.78rem; letter-spacing:.12em; margin-bottom:.6rem; }
+    .stage h1{ font-size:clamp(1.45rem, 6.6vw, 1.9rem); margin-bottom:1.8rem; max-width:18ch; }
+
+    .lamps{
+      display:grid; grid-template-columns:repeat(3, 1fr);
+      column-gap:clamp(.9rem, 6vw, 2rem); row-gap:64px;
+      justify-items:center; align-items:end;
+    }
+    .lamp{ width:clamp(78px, 24vw, 112px); }
+
+    .ribbon{ height:40px; }
+    .bow{ width:100px; top:50%; bottom:auto; transform:translate(-50%,-50%); }
+    .stage.launched .bow{ animation:bowFallM 1.5s ease-in forwards; }
+
+    .ecg-band{ height:140px; }
+    .date-line{ margin-top:2.2rem; font-size:.82rem; }
+
+    .count span{ font-size:clamp(5rem, 26vw, 8rem); }
+
+    .reveal .brand-sm img{ height:88px; margin-bottom:.6rem; }
+    .reveal .declare{ font-size:.74rem; letter-spacing:.12em; }
+    .reveal h2{ font-size:clamp(2rem, 10vw, 2.6rem); }
+    .reveal h2 .amp{ display:block; padding:.15em 0; vertical-align:0; }
+    .reveal .tag{ font-size:.98rem; padding:0 .25rem; }
+    .device-duo{ gap:1.4rem; margin-top:1.6rem; }
+    .reveal .stamp{ font-size:.72rem; letter-spacing:.06em; padding:.6rem 1rem;
+      line-height:1.5; max-width:100%; }
+
+    .products{ padding:4rem 1.1rem 2.5rem; }
+    .products .lede{ margin-bottom:2.4rem; }
+    .duo{ gap:3rem; }
+    .product h4{ font-size:1.35rem; }
+    footer{ padding:2rem 1.1rem calc(2.5rem + env(safe-area-inset-bottom,0px)); }
+    footer img{ height:44px; }
+
+    .modebar{ right:8px; }
+    .modebar button{ padding:.4rem .7rem; font-size:.74rem; }
+
+    .ctrl img.logo{ height:88px; margin-bottom:.6rem; }
+    .ctrl h2{ font-size:1.5rem; }
+    .pick{ gap:.6rem; }
+    .solo .lamp{ width:min(52vw, 200px); }
+  }
+  @keyframes bowFallM{
+    to{ transform:translate(-50%,-50%) translateY(360px) rotate(42deg); opacity:0; }
+  }
+
+  /* ---------- very small phones ---------- */
+  @media (max-width:360px){
+    .lamp{ width:26vw; }
+    .lamps{ row-gap:56px; }
+    .pick button{ font-size:1.35rem; }
+  }
+
+  /* ---------- phones in landscape / short screens: keep one row, compress vertically ---------- */
+  @media (max-height:520px) and (orientation:landscape){
+    .stage{ padding-top:calc(3rem + env(safe-area-inset-top,0px)); padding-bottom:1.2rem; }
+    .brand img{ height:76px; }
+    .kicker{ margin-bottom:.35rem; font-size:.78rem; }
+    .stage h1{ font-size:clamp(1.2rem, 3.6vw, 1.7rem); margin-bottom:1rem; max-width:none; }
+    .lamp{ width:clamp(60px, 11vw, 100px); }
+    .bow{ width:80px; bottom:-34px; }
+    .date-line{ margin-top:3.2rem; }
+    .ctrl{ padding-top:calc(3rem + env(safe-area-inset-top,0px)); }
+    .ctrl .hint{ margin-bottom:1rem; }
+    .pick{ grid-template-columns:repeat(6, 1fr); width:min(560px,100%); }
+    .solo .lamp{ width:min(26vh, 140px); }
+  }
 
   @media (prefers-reduced-motion: reduce){
     .ecg-band svg, .lamp .flame, .lamp .glow{ animation:none !important; }
@@ -702,10 +791,20 @@
     if(launched || !ribbon) return;
     var hb = lampsRow.getBoundingClientRect(), st = stage.getBoundingClientRect();
     if(!hb.height) return; /* stage hidden (ctrl mode) */
-    ribbon.style.top = (hb.top + hb.height*0.58 - st.top) + 'px';
+    var first = lamps[0].getBoundingClientRect();
+    var second = lamps[3] ? lamps[3].getBoundingClientRect() : first;
+    var y;
+    if(second.top >= first.bottom - 2){
+      /* two rows (phone grid): run the ribbon through the gap between rows */
+      y = (first.bottom + second.top) / 2;
+    } else {
+      y = hb.top + hb.height * 0.58;
+    }
+    ribbon.style.top = (y - st.top) + 'px';
   }
   alignRibbon();
   addEventListener('resize', alignRibbon);
+  addEventListener('orientationchange', function(){ setTimeout(alignRibbon, 250); });
   setTimeout(alignRibbon, 350);
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(alignRibbon); }
 
